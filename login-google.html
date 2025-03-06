@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+<div id="g_id_onload"
+    data-client_id="804080842146-ssbcu8er3asgs3hij2cv2e8kk10ghjk8.apps.googleusercontent.com"
+    data-callback="handleCredentialResponse">
+</div>
+<div class="g_id_signin" data-type="standard"></div>
+<textarea readonly type="text" id="token" cols="100"></textarea>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script>
+    function handleCredentialResponse(value){
+      console.log(value)
+      document.getElementById('token').innerHTML = value.credential
+    }
+</script>
+</body>
+</html>
