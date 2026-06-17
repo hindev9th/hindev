@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Đọc truyện</title>
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" id="og-title" content="Đọc truyện tranh online" />
+  <meta property="og:description" id="og-desc" content="Đọc ngay trên ứng dụng của chúng tôi" />
+  <meta property="og:image" id="og-image" content="" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" id="tw-title" content="Đọc truyện tranh online" />
+  <meta name="twitter:image" id="tw-image" content="" />
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --primary: #FF6B35;
+      --bg: #0f0f13;
+      --surface: #1a1a24;
+      --surface2: #252532;
+      --text: #f0f0f5;
+      --text-muted: #8888aa;
+      --radius: 16px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+    }
+
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      width: 100%;
+      max-width: 420px;
+      overflow: hidden;
+      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6);
+    }
+
+    /* Cover image */
+    .cover-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16/9;
+      background: var(--surface2);
+      overflow: hidden;
+    }
+
+    .cover-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: opacity .4s;
+    }
+
+    .cover-wrap .cover-gradient {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        to bottom,
+        transparent 40%,
+        rgba(26, 26, 36, 0.95) 100%
+      );
+    }
+
+    .cover-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+    }
+
+    /* App badge */
+    .app-badge {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(8px);
+      padding: 6px 10px;
+      border-radius: 999px;
+    }
+
+    .app-badge .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #4caf50;
+      animation: pulse 1.8s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .app-badge span {
+      font-size: 12px;
+      color: #ccc;
+      font-weight: 500;
+    }
+
+    /* Body */
+    .card-body {
+      padding: 20px;
+    }
+
+    .comic-meta {
+      margin-bottom: 20px;
+    }
+
+    .comic-title {
+      font-size: 22px;
+      font-weight: 700;
+      line-height: 1.3;
+      margin-bottom: 6px;
+    }
+
+    .comic-sub {
+      font-size: 13px;
+      color: var(--text-muted);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .tag {
+      background: var(--surface2);
+      color: var(--text-muted);
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-weight: 500;
+    }
+
+    /* CTA primary */
+    .btn-open {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 16px;
+      background: var(--primary);
+      color: white;
+      font-size: 16px;
+      font-weight: 700;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: opacity .2s, transform .1s;
+      text-decoration: none;
+    }
+
+    .btn-open:active {
+      opacity: .85;
+      transform: scale(.98);
+    }
+
+    .btn-open svg {
+      flex-shrink: 0;
+    }
+
+    /* Download section */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 16px 0;
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--surface2);
+    }
+
+    .btn-download {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 14px;
+      background: var(--surface2);
+      color: var(--text);
+      font-size: 15px;
+      font-weight: 600;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background .2s, transform .1s;
+      text-decoration: none;
+    }
+
+    .btn-download:hover {
+      background: #2e2e40;
+    }
+
+    .btn-download:active {
+      transform: scale(.98);
+    }
+
+    /* Countdown badge */
+    .countdown-bar {
+      margin-top: 16px;
+      padding: 10px 14px;
+      background: var(--surface2);
+      border-radius: 10px;
+      font-size: 13px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .countdown-bar .timer {
+      margin-left: auto;
+      font-weight: 700;
+      color: var(--primary);
+      min-width: 24px;
+      text-align: right;
+    }
+
+    /* Progress bar */
+    .progress-track {
+      height: 3px;
+      background: var(--surface2);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--primary);
+      border-radius: 2px;
+      transition: width 1s linear;
+      width: 100%;
+    }
+
+    /* States */
+    .state-checking, .state-downloading {
+      text-align: center;
+      padding: 8px 0 4px;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--surface2);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .hidden { display: none !important; }
+
+    /* Footer */
+    .footer {
+      margin-top: 28px;
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <!-- Cover -->
+  <div class="cover-wrap" id="cover-wrap">
+    <div class="cover-placeholder" id="cover-placeholder">📖</div>
+    <img id="cover-img" src="" alt="" style="display:none; opacity:0;" />
+    <div class="cover-gradient"></div>
+    <div class="app-badge">
+      <div class="dot"></div>
+      <span>Comic App</span>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div class="card-body">
+    <div class="comic-meta">
+      <div class="comic-title" id="comic-title">Đang tải...</div>
+      <div class="comic-sub" id="comic-sub"></div>
+      <div class="tags" id="comic-tags"></div>
+    </div>
+
+    <!-- Open in app -->
+    <a class="btn-open" id="btn-open" href="#">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8l6 4-6 4z" fill="white"/>
+      </svg>
+      Mở trong ứng dụng
+    </a>
+
+    <div class="divider">hoặc</div>
+
+    <!-- Download -->
+    <a class="btn-download" id="btn-download" href="#">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+        <path d="M12 16l-5-5h3V4h4v7h3l-5 5z" fill="currentColor"/>
+        <path d="M5 20h14v-2H5v2z" fill="currentColor"/>
+      </svg>
+      <span id="btn-download-text">Tải ứng dụng (.apk)</span>
+    </a>
+
+    <!-- Countdown (shown when app not detected) -->
+    <div class="countdown-bar hidden" id="countdown-bar">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+        <path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2zm1 11H11V7h2v6zm0 4H11v-2h2v2z" fill="currentColor"/>
+      </svg>
+      <span>Tự động tải APK sau</span>
+      <span class="timer" id="countdown-timer">5</span>s
+    </div>
+
+    <div class="progress-track hidden" id="progress-track">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  Comic App &mdash; Đọc truyện miễn phí
+</div>
+
+<script>
+  // ─── CONFIG ────────────────────────────────────────────────────────────────
+  const CONFIG = {
+    scheme:      'comic',                          // custom URL scheme
+    package:     'com.example.comic',             // Android package ID
+    apkUrl:      'https://yourdomain.com/app/comic.apk',  // APK download URL
+    storeUrl:    'https://play.google.com/store/apps/details?id=com.example.comic',
+  };
+
+  const AUTO_DOWNLOAD_DELAY = 5;   // seconds before auto-downloading APK
+  // ───────────────────────────────────────────────────────────────────────────
+
+  const params  = new URLSearchParams(location.search);
+  const comicId = params.get('id')    || '';
+  const name    = params.get('name')  || 'Truyện tranh';
+  const image   = params.get('image') || '';
+  const author  = params.get('author')|| '';
+  const desc    = params.get('desc')  || '';
+  const chapter = params.get('chapter') || '';
+  const tagsRaw = params.get('tags')  || '';
+
+  // ── Populate UI ──────────────────────────────────────────────────────────
+  document.title = name + ' – Comic App';
+  document.getElementById('comic-title').textContent = name;
+
+  const subParts = [author && `Tác giả: ${author}`, desc].filter(Boolean);
+  document.getElementById('comic-sub').textContent = subParts.join(' · ');
+
+  if (tagsRaw) {
+    const container = document.getElementById('comic-tags');
+    tagsRaw.split(',').slice(0, 5).forEach(t => {
+      const el = document.createElement('span');
+      el.className = 'tag';
+      el.textContent = t.trim();
+      container.appendChild(el);
+    });
+  }
+
+  if (image) {
+    const img = document.getElementById('cover-img');
+    document.getElementById('cover-placeholder').style.display = 'none';
+    img.style.display = 'block';
+    img.onload = () => { img.style.opacity = '1'; };
+    img.src = image;
+
+    document.getElementById('og-image').content  = image;
+    document.getElementById('tw-image').content  = image;
+  }
+
+  document.getElementById('og-title').content   = name + ' – Comic App';
+  document.getElementById('og-desc').content    = desc || 'Đọc truyện tranh online';
+  document.getElementById('tw-title').content   = name + ' – Comic App';
+
+  // ── Deep link ────────────────────────────────────────────────────────────
+  // Intent URL: opens app directly on Android Chrome, falls back to APK URL
+  const deepPath = comicId ? `detail/${comicId}` : '';
+  const intentUrl =
+    `intent://${deepPath}` +
+    `#Intent;scheme=${CONFIG.scheme}` +
+    `;package=${CONFIG.package}` +
+    `;S.browser_fallback_url=${encodeURIComponent(CONFIG.apkUrl)}` +
+    `;end`;
+
+  // Custom scheme fallback (iOS / older Android)
+  const schemeUrl = `${CONFIG.scheme}://${deepPath}`;
+
+  document.getElementById('btn-open').href     = intentUrl;
+  document.getElementById('btn-download').href = CONFIG.apkUrl;
+
+  // ── App detection & auto-download logic ──────────────────────────────────
+  let autoTimer      = null;
+  let countdownTimer = null;
+  let secondsLeft    = AUTO_DOWNLOAD_DELAY;
+  let downloadStarted = false;
+
+  function startAutoDownload() {
+    if (downloadStarted) return;
+
+    const bar     = document.getElementById('countdown-bar');
+    const track   = document.getElementById('progress-track');
+    const fill    = document.getElementById('progress-fill');
+    const display = document.getElementById('countdown-timer');
+
+    bar.classList.remove('hidden');
+    track.classList.remove('hidden');
+
+    // Animate bar from 100% → 0% over delay seconds
+    setTimeout(() => { fill.style.width = '0%'; }, 50);
+
+    countdownTimer = setInterval(() => {
+      secondsLeft--;
+      display.textContent = secondsLeft;
+      if (secondsLeft <= 0) {
+        clearInterval(countdownTimer);
+        triggerDownload();
+      }
+    }, 1000);
+  }
+
+  function triggerDownload() {
+    if (downloadStarted) return;
+    downloadStarted = true;
+
+    document.getElementById('countdown-bar').classList.add('hidden');
+    document.getElementById('progress-track').classList.add('hidden');
+    document.getElementById('btn-download-text').textContent = 'Đang tải…';
+
+    const a  = document.createElement('a');
+    a.href   = CONFIG.apkUrl;
+    a.download = 'comic.apk';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
+  function tryOpenApp() {
+    const start = Date.now();
+
+    // Try intent URL on Android
+    window.location.href = intentUrl;
+
+    // If app opens, user leaves page → timer never fires.
+    // If app is not installed, page stays → start auto-download countdown.
+    autoTimer = setTimeout(() => {
+      if (Date.now() - start < 3000) {
+        // Still on page: app probably not installed
+        startAutoDownload();
+      }
+    }, 2200);
+  }
+
+  // Manual "open in app" click
+  document.getElementById('btn-open').addEventListener('click', e => {
+    e.preventDefault();
+
+    // Cancel any running auto-download
+    clearInterval(countdownTimer);
+    clearTimeout(autoTimer);
+    downloadStarted = false;
+    secondsLeft     = AUTO_DOWNLOAD_DELAY;
+
+    document.getElementById('countdown-bar').classList.add('hidden');
+    document.getElementById('progress-track').classList.add('hidden');
+
+    tryOpenApp();
+  });
+
+  // Manual download button
+  document.getElementById('btn-download').addEventListener('click', e => {
+    e.preventDefault();
+    clearInterval(countdownTimer);
+    clearTimeout(autoTimer);
+    triggerDownload();
+  });
+
+  // ── Auto-open on page load ────────────────────────────────────────────────
+  // Small delay to let page render first
+  setTimeout(tryOpenApp, 600);
+</script>
+</body>
+</html>
