@@ -11,10 +11,12 @@
   <meta property="og:title" id="og-title" content="Đọc truyện tranh online" />
   <meta property="og:description" id="og-desc" content="Đọc ngay trên Comic App" />
   <meta property="og:image" id="og-image" content="" />
+  <meta property="og:url" id="og-url" content="" />
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" id="tw-title" content="Đọc truyện tranh online" />
+  <meta name="twitter:description" id="tw-desc" content="Đọc ngay trên Comic App" />
   <meta name="twitter:image" id="tw-image" content="" />
 
   <style>
@@ -90,9 +92,28 @@
       position: absolute;
       inset: 0;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      font-size: 52px;
+      gap: 12px;
+      background: linear-gradient(135deg, #1a1a24 0%, #252532 100%);
+    }
+
+    .cover-placeholder svg {
+      opacity: .35;
+    }
+
+    .cover-placeholder .ph-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      max-width: 80%;
+      text-align: center;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      -webkit-box-orient: vertical;
     }
 
     .app-badge {
@@ -270,7 +291,14 @@
 
     <!-- Cover -->
     <div class="cover">
-      <div class="cover-placeholder" id="placeholder">📖</div>
+      <div class="cover-placeholder" id="placeholder">
+        <svg width="56" height="56" viewBox="0 0 24 24" fill="none">
+          <path d="M6 2a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0
+                   2-2V8l-6-6H6zm0 2h7v5h5v11H6V4zm2 8v2h8v-2H8zm0
+                   4v2h5v-2H8z" fill="white" />
+        </svg>
+        <span class="ph-title" id="ph-title"></span>
+      </div>
       <img id="cover-img" src="" alt="" />
       <div class="cover-gradient"></div>
       <div class="app-badge">
@@ -333,6 +361,7 @@
     const desc = p.get('desc') || '';
     const chapter = p.get('chapter') || '';
     const tags = p.get('tags') || '';
+    const version = p.get('v') || '';      // app version that created this share
 
     /* ── Populate ── */
     document.title = name + ' – Comic App';
@@ -351,23 +380,39 @@
       });
     }
 
+    /* Placeholder luôn hiện title để fallback có nghĩa */
+    document.getElementById('ph-title').textContent = name;
+
     if (image) {
       const img = document.getElementById('cover-img');
-      img.onload = () => img.classList.add('loaded');
-      img.onerror = () => { };
+      const phEl = document.getElementById('placeholder');
+      img.onload = () => {
+        img.classList.add('loaded');
+        phEl.style.display = 'none';
+      };
+      img.onerror = () => {
+        /* Ảnh lỗi → giữ placeholder, ẩn img */
+        img.style.display = 'none';
+        phEl.style.display = '';
+      };
+      /* Ẩn placeholder trước, chờ load */
+      phEl.style.display = 'none';
       img.src = image;
-      document.getElementById('placeholder').style.display = 'none';
-      ['og-image', 'tw-image'].forEach(id => document.getElementById(id).setAttribute('content', image));
+      ['og-image', 'tw-image'].forEach(id =>
+        document.getElementById(id).setAttribute('content', image));
     }
 
     document.getElementById('og-title').setAttribute('content', name + ' – Comic App');
     document.getElementById('og-desc').setAttribute('content', desc || 'Đọc truyện tranh online');
+    document.getElementById('og-url').setAttribute('content', window.location.href);
     document.getElementById('tw-title').setAttribute('content', name + ' – Comic App');
+    document.getElementById('tw-desc').setAttribute('content', desc || 'Đọc truyện tranh online');
 
     /* ── Deep link ── */
     const deepPath = comicId ? `detail/${comicId}` : '';
+    const versionQs = version ? `?minVersion=${encodeURIComponent(version)}` : '';
     const intentUrl =
-      `intent://${deepPath}` +
+      `intent://${deepPath}${versionQs}` +
       `#Intent;scheme=${CFG.scheme}` +
       `;package=${CFG.package}` +
       `;end`;
